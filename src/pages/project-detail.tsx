@@ -1,9 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { FileText, Github, Youtube, Share2 } from "lucide-react"
-import { useParams } from "react-router-dom"
 
 export function ProjectDetail() {
-	const { slug } = useParams()
 
 	// In reality, fetch data based on slug here
 	const projectTitle = "Neural Rendering in the Wild: 3D Reconstruction from Uncontrolled Images"
