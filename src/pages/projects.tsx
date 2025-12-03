@@ -1,24 +1,5 @@
 import { Link } from "react-router-dom";
-
-// Mock Data - move to src/data/projects.ts later
-const projects = [
-	{
-		slug: "neural-rendering-3d",
-		title: "Neural Rendering in the Wild: 3D Reconstruction from Uncontrolled Images",
-		authors: "Alex Sperid, Sarah Chen, David Wu",
-		venue: "CVPR 2024 (Oral)",
-		thumbnail: "https://placehold.co/600x400/png",
-		description: "A novel method for reconstructing 3D scenes from internet photo collections using gaussian splatting priors."
-	},
-	{
-		slug: "diffusion-video",
-		title: "Consistent Video Generation with Latent Diffusion Models",
-		authors: "Sarah Chen, Alex Sperid",
-		venue: "ICCV 2023",
-		thumbnail: "https://placehold.co/600x400/png",
-		description: "Temporal consistency in video generation using guided diffusion and optical flow constraints."
-	}
-]
+import { projects } from "@/data/projects";
 
 export function ProjectsPage() {
 	return (

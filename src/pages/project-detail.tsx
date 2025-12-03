@@ -1,87 +1,119 @@
 import { Button } from "@/components/ui/button"
-import { FileText, Github, Youtube, Share2 } from "lucide-react"
+import { FileText, Github, Youtube, Share2, ArrowLeft } from "lucide-react"
+import { useParams, Link } from "react-router-dom"
+import { projects } from "@/data/projects"
 
 export function ProjectDetail() {
+	const { slug } = useParams()
 
-	// In reality, fetch data based on slug here
-	const projectTitle = "Neural Rendering in the Wild: 3D Reconstruction from Uncontrolled Images"
+	// 1. Find the project matching the URL slug
+	const project = projects.find((p) => p.slug === slug)
 
+	// 2. Handle 404 Case (Project not found)
+	if (!project) {
+		return (
+			<div className="flex flex-col items-center justify-center py-20 text-center">
+				<h1 className="text-4xl font-bold mb-4">Project not found</h1>
+				<p className="text-muted-foreground mb-8">The project you are looking for does not exist.</p>
+				<Button asChild>
+					<Link to="/projects"><ArrowLeft className="mr-2 h-4 w-4" /> Back to Projects</Link>
+				</Button>
+			</div>
+		)
+	}
+
+	// 3. Render Dynamic Data
 	return (
-		<article className="max-w-4xl mx-auto space-y-12 pb-12">
+		<article className="max-w-4xl mx-auto space-y-12 pb-12 animate-in fade-in duration-500">
+
+			{/* Navigation Back */}
+			<div>
+				<Link to="/projects" className="text-sm text-muted-foreground hover:text-primary flex items-center transition-colors">
+					<ArrowLeft className="mr-2 h-4 w-4" /> Back to projects
+				</Link>
+			</div>
+
 			{/* Header */}
 			<div className="text-center space-y-6">
-				<h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-slate-900">
-					{projectTitle}
+				<h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-foreground">
+					{project.title}
 				</h1>
 
-				{/* Authors */}
-				<div className="flex flex-wrap justify-center gap-x-8 gap-y-2 text-lg text-slate-600">
-					<span className="cursor-pointer hover:text-primary underline decoration-dotted">Alex Sperid</span>
-					<span className="cursor-pointer hover:text-primary underline decoration-dotted">Sarah Chen</span>
-					<span className="cursor-pointer hover:text-primary underline decoration-dotted">David Wu</span>
+				{/* Authors - split string by comma to style individually */}
+				<div className="flex flex-wrap justify-center gap-x-8 gap-y-2 text-lg text-muted-foreground">
+					{project.authors.split(',').map((author, index) => (
+						<span key={index} className="cursor-pointer hover:text-primary underline decoration-dotted underline-offset-4 transition-colors">
+							{author.trim()}
+						</span>
+					))}
 				</div>
 
-				<div className="text-slate-500 font-medium">
-					CVPR 2024 (Oral Presentation)
+				<div className="inline-block rounded-full bg-secondary px-4 py-1.5 text-sm font-medium text-secondary-foreground">
+					{project.venue}
 				</div>
 
 				{/* Links */}
 				<div className="flex flex-wrap justify-center gap-4">
-					<Button className="rounded-full" size="lg">
-						<FileText className="mr-2 h-4 w-4" /> Paper
+					<Button className="rounded-full" size="lg" asChild>
+						<a href={project.links.paper || "#"} target="_blank">
+							<FileText className="mr-2 h-4 w-4" /> Paper
+						</a>
 					</Button>
-					<Button variant="outline" className="rounded-full" size="lg">
-						<Github className="mr-2 h-4 w-4" /> Code
+					<Button variant="outline" className="rounded-full" size="lg" asChild>
+						<a href={project.links.code || "#"} target="_blank">
+							<Github className="mr-2 h-4 w-4" /> Code
+						</a>
 					</Button>
-					<Button variant="outline" className="rounded-full" size="lg">
-						<Youtube className="mr-2 h-4 w-4" /> Video
-					</Button>
-					<Button variant="ghost" className="rounded-full" size="lg">
-						<Share2 className="mr-2 h-4 w-4" /> BibTeX
+					{project.links.video && (
+						<Button variant="outline" className="rounded-full" size="lg" asChild>
+							<a href={project.links.video} target="_blank">
+								<Youtube className="mr-2 h-4 w-4" /> Video
+							</a>
+						</Button>
+					)}
+					<Button variant="ghost" className="rounded-full" size="lg" onClick={() => navigator.clipboard.writeText(project.bibtex)}>
+						<Share2 className="mr-2 h-4 w-4" /> Copy BibTeX
 					</Button>
 				</div>
 			</div>
 
-			{/* Teaser */}
-			<figure className="rounded-xl border bg-slate-100 overflow-hidden shadow-sm">
+			{/* Teaser Image */}
+			<figure className="rounded-xl border bg-muted overflow-hidden shadow-sm">
 				<img
-					src="https://placehold.co/1200x600/png?text=Teaser+Result+Image"
-					alt="Teaser"
-					className="w-full h-auto"
+					src={project.thumbnail}
+					alt={`Teaser for ${project.title}`}
+					className="w-full h-auto max-h-[600px] object-cover"
 				/>
-				<figcaption className="p-4 text-center text-sm text-muted-foreground bg-white/50">
-					Figure 1: Our method reconstructs high-fidelity 3D scenes from uncalibrated image collections.
+				<figcaption className="p-4 text-center text-sm text-muted-foreground bg-background/50 backdrop-blur">
+					Figure 1: {project.description}
 				</figcaption>
 			</figure>
 
 			{/* Abstract */}
-			<section className="bg-slate-50 p-6 md:p-8 rounded-2xl border">
+			<section className="bg-card p-6 md:p-8 rounded-2xl border shadow-sm">
 				<h2 className="text-2xl font-bold mb-4 text-center">Abstract</h2>
-				<p className="text-justify text-slate-700 leading-relaxed">
-					We present a novel approach for reconstructing 3D scenes from uncontrolled image collections.
-					Unlike previous methods that rely on accurate camera poses, our method jointly optimizes for
-					geometry, appearance, and camera parameters. We introduce a robust initialization strategy
-					based on Gaussian Splatting priors and a diffusion-based regularization term that ensures
-					plausible geometry in unseen regions. Experiments on standard benchmarks demonstrate that
-					our method outperforms state-of-the-art techniques in both rendering quality and geometric accuracy.
+				<p className="text-justify text-card-foreground leading-relaxed text-lg">
+					{project.abstract}
 				</p>
 			</section>
 
-			{/* Main Content - Markdown style */}
-			<div className="prose prose-slate max-w-none">
+			{/* Main Content (Static for now, but layout prepared for MDX/Content) */}
+			<div className="prose prose-slate dark:prose-invert max-w-none mx-auto">
 				<h2 className="text-center">Methodology</h2>
 				<p>
 					Our pipeline consists of three main stages. First, we estimate initial camera poses using
 					Structure-from-Motion (SfM). Second, we train a coarse Gaussian Splatting model to capture
 					the scene geometry. Finally, we refine the model using our proposed diffusion regularization.
 				</p>
-				<div className="my-8 rounded-lg border bg-white p-4 flex items-center justify-center min-h-[300px]">
+
+				{/* Placeholder for architecture diagram */}
+				<div className="my-8 rounded-lg border border-dashed p-12 flex items-center justify-center bg-muted/30 text-muted-foreground">
 					[ Architecture Diagram Placeholder ]
 				</div>
 
 				<h2 className="text-center">Results</h2>
 				<p>
-					We compare our method against NeRF-W and Gaussian Splatting. As shown in the video below,
+					We compare our method against NeRF-W and Gaussian Splatting. As shown in the video,
 					our approach achieves significantly better temporal stability and fewer artifacts in
 					occluded regions.
 				</p>
@@ -90,13 +122,8 @@ export function ProjectDetail() {
 			{/* Citation */}
 			<section>
 				<h3 className="text-xl font-bold mb-4">Citation</h3>
-				<pre className="bg-slate-900 text-slate-50 p-4 rounded-lg overflow-x-auto text-sm font-mono">
-					{`@inproceedings{sperid2024neural,
-  title={Neural Rendering in the Wild},
-  author={Sperid, Alex and Chen, Sarah and Wu, David},
-  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
-  year={2024}
-}`}
+				<pre className="bg-slate-950 text-slate-50 p-6 rounded-lg overflow-x-auto text-sm font-mono border shadow-inner">
+					{project.bibtex}
 				</pre>
 			</section>
 		</article>
